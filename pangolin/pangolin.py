@@ -16,15 +16,18 @@ IN_MAP = np.asarray([[0, 0, 0, 0],
 
 
 def one_hot_encode(seq, strand):
-    seq = seq.upper().replace('A', '1').replace('C', '2')
-    seq = seq.replace('G', '3').replace('T', '4').replace('N', '0')
+    # Convert to uppercase
+    seq = seq.upper()
+    # Replace every character that is not A, C, G, or T with 'N'
+    seq = ''.join(['N' if char not in 'ACGT' else char for char in seq])
+    # Then replace A, C, G, T with 1, 2, 3, 4, respectively, and N (everything else) with 0
+    seq = seq.replace('A', '1').replace('C', '2').replace('G', '3').replace('T', '4').replace('N', '0')
     if strand == '+':
         seq = np.asarray(list(map(int, list(seq))))
     elif strand == '-':
         seq = np.asarray(list(map(int, list(seq[::-1]))))
         seq = (5 - seq) % 5  # Reverse complement
     return IN_MAP[seq.astype('int8')]
-
 
 def compute_score(ref_seq, alt_seq, strand, d, models):
     ref_seq = one_hot_encode(ref_seq, strand).T
